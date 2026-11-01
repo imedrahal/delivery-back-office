@@ -1,0 +1,39 @@
+export const LOCALES = ['ar', 'fr', 'en'];
+export const DEFAULT_LOCALE = 'fr';
+export const RTL_LOCALES = ['ar'];
+export const LOCALE_TAGS = { ar: 'ar-TN', fr: 'fr-TN', en: 'en-GB' };
+export const LOCALE_LABELS = { ar: 'العربية', fr: 'Français', en: 'English' };
+export const PAGE_SIZE = 8;
+
+export const DELIVERY_STATUSES = [
+  'OPEN_FOR_PREFERRED_COURIER', 'OPEN_FOR_COURIERS', 'ASSIGNED',
+  'PICKED_UP', 'DELIVERED', 'FAILED', 'CANCELLED',
+];
+export const RETURN_STATUSES = [
+  'RETURN_REQUESTED', 'APPROVED', 'REJECTED', 'OPEN_FOR_PREFERRED_COURIER',
+  'OPEN_FOR_COURIERS', 'ASSIGNED', 'RETURN_PICKED_UP', 'RETURNED', 'CANCELLED',
+];
+export const KARYA_STATUSES = [
+  'OPEN_FOR_QUOTES', 'PROVIDER_SELECTED', 'ACCEPTED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED',
+];
+export const DISPUTE_STATUSES = ['OPEN', 'UNDER_REVIEW', 'RESOLVED', 'REJECTED', 'CLOSED'];
+export const PROVIDER_STATUSES = ['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'];
+export const ACCOUNT_STATUSES = ['ACTIVE', 'DEACTIVATED'];
+export const MODERATION_STATUSES = ['VISIBLE', 'HIDDEN'];
+
+export const OPEN_DELIVERY_STATUSES = ['OPEN_FOR_PREFERRED_COURIER', 'OPEN_FOR_COURIERS'];
+export const CLOSED_RETURN_STATUSES = ['RETURNED', 'REJECTED', 'CANCELLED'];
+export const OPEN_DISPUTE_STATUSES = ['OPEN', 'UNDER_REVIEW'];
+
+export const RETURN_TYPES = ['POST_DELIVERY', 'FAILED_DELIVERY'];
+export const KARYA_CATEGORIES = ['TRANSPORT', 'MOVING'];
+export const DISPUTE_CATEGORIES = ['NOT_COMPLETED', 'DAMAGE', 'BEHAVIOR', 'ADDRESS_CONTACT', 'PRICING', 'OTHER'];
+export const REASONS = [
+  'RECIPIENT_UNAVAILABLE', 'ADDRESS_ISSUE', 'RECIPIENT_REFUSED', 'PARCEL_ISSUE',
+  'SAFETY_ISSUE', 'DAMAGED', 'WRONG_ITEM', 'CHANGED_MIND', 'OTHER',
+];
+export const JOB_TYPES = ['DELIVERY', 'RETURN', 'KARYA'];
+export const ROLES = ['customer', 'courier', 'karya'];
+
+// Actions that deserve a "destructive" visual treatment.
+export const DANGER_TARGETS = ['CANCELLED', 'REJECTED', 'SUSPENDED', 'DEACTIVATED', 'HIDDEN', 'FAILED'];

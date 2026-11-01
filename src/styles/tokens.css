@@ -1,0 +1,30 @@
+:root {
+  --font: 'IBM Plex Sans', 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, system-ui, sans-serif;
+
+  --ink: #17202b;
+  --ink-2: #4a5868;
+  --ink-3: #66727f;
+  --canvas: #f4f6f8;
+  --surface: #ffffff;
+  --line: #e1e6eb;
+  --line-strong: #c9d1d9;
+
+  --brand: #1f4e9e;
+  --brand-strong: #163a78;
+  --brand-soft: #e7eefa;
+  --nav: #0e2748;
+  --nav-hover: #173760;
+  --nav-text: #b9c8de;
+
+  --success: #1b7a4b; --success-soft: #e2f3ea;
+  --warning: #905400; --warning-soft: #fbf0d9;
+  --danger: #b3342a;  --danger-soft: #fbe6e3;
+  --info: #33557a;    --info-soft: #e8eef5;
+
+  --radius-sm: 6px;
+  --radius: 10px;
+  --shadow-overlay: 0 0 0 1px rgba(23, 32, 43, .06), 0 16px 48px rgba(23, 32, 43, .22);
+  --sidebar-w: 248px;
+  --slide: 1; /* drawer slide direction, flipped in RTL */
+}
+[dir='rtl'] { --slide: -1; }
