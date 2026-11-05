@@ -5,7 +5,7 @@ export default function DetailGrid({ items }) {
       {items.map((item) => (
         <div key={item.label} className="detail-grid__row">
           <dt>{item.label}</dt>
-          <dd>{typeof item.value === 'string' ? <bdi>{item.value}</bdi> : item.value ?? '—'}</dd>
+          <dd>{item.value ?? '—'}</dd>
         </div>
       ))}
     </dl>

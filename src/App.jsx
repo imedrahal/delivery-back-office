@@ -3,7 +3,6 @@ import AppLayout from './components/layout/AppLayout.jsx';
 import ProtectedRoute from './components/layout/ProtectedRoute.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { I18nProvider } from './context/I18nContext.jsx';
-import { ToastProvider } from './context/ToastContext.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
 import DeliveriesPage from './pages/DeliveriesPage.jsx';
 import DisputesPage from './pages/DisputesPage.jsx';
@@ -17,7 +16,6 @@ export default function App() {
   return (
     <I18nProvider>
       <AuthProvider>
-        <ToastProvider>
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
@@ -35,7 +33,6 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
-        </ToastProvider>
       </AuthProvider>
     </I18nProvider>
   );

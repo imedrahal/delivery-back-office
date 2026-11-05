@@ -4,12 +4,8 @@ import { useI18n } from '../../context/I18nContext.jsx';
 export default function LanguageSwitcher() {
   const { locale, setLocale, t } = useI18n();
   return (
-    <div className="segmented" role="group" aria-label={t('common.language')}>
-      {LOCALES.map((code) => (
-        <button key={code} type="button" lang={code} aria-pressed={code === locale} onClick={() => setLocale(code)}>
-          {LOCALE_LABELS[code]}
-        </button>
-      ))}
-    </div>
+    <select className="lang-select" value={locale} aria-label={t('common.language')} onChange={(e) => setLocale(e.target.value)}>
+      {LOCALES.map((code) => <option key={code} value={code}>{LOCALE_LABELS[code]}</option>)}
+    </select>
   );
 }

@@ -4,7 +4,6 @@ import ReasonDialog from './ReasonDialog.jsx';
 import { DANGER_TARGETS } from '../../domain/constants.js';
 import { allowedTargets, requiresDecisionNote } from '../../domain/transitions.js';
 import { useI18n } from '../../context/I18nContext.jsx';
-import { useToast } from '../../context/ToastContext.jsx';
 
 /**
  * Generic, entity-agnostic admin action bar.
@@ -12,7 +11,6 @@ import { useToast } from '../../context/ToastContext.jsx';
  */
 export default function StatusActionPanel({ entity, status, submit, onDone }) {
   const { t } = useI18n();
-  const { notify } = useToast();
   const [target, setTarget] = useState(null);
   const targets = allowedTargets(entity, status);
 
@@ -22,7 +20,6 @@ export default function StatusActionPanel({ entity, status, submit, onDone }) {
   const handleSubmit = async (form) => {
     const updated = await submit(target, form);
     setTarget(null);
-    notify(t('toast.updated'));
     onDone(updated);
   };
 

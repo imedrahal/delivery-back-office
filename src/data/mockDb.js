@@ -7,6 +7,10 @@ let db = createSeedDb();
 export const getDb = () => db;
 export const resetDb = (seed = createSeedDb()) => { db = seed; };
 
+export function insert(collection, item, auditLog) {
+  db = { ...db, [collection]: [...db[collection], item], audit_logs: [...db.audit_logs, auditLog] };
+}
+
 export function commit(collection, item, auditLog) {
   db = {
     ...db,

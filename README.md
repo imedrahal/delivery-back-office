@@ -24,14 +24,6 @@ Compte de démonstration : `admin@delivery.tn` / `Admin123!`
 - Arabe (RTL), français, anglais — langue mémorisée, `dir` appliqué sur `<html>`
 - Chaque action admin : confirmation + motif obligatoire, événement ajouté à l'historique, entrée `audit_logs`
 
-## Design system (v2)
-
-- Tokens dans `src/styles/tokens.css` (couleurs, rayons, ombres) ; `base.css` (shell, navigation) ; `components.css` (composants).
-- Police : IBM Plex Sans + IBM Plex Sans Arabic (Google Fonts, avec repli système).
-- CSS en propriétés logiques (`inline-start/end`) : le RTL est géré sans règles dédiées.
-- Détail d'un enregistrement dans un `Drawer` latéral ; confirmations dans `Modal` ; retours d'action via `ToastContext`.
-- Nouveaux composants génériques : `Icon`, `Drawer`, `ActivityFeed`, `ToastRegion`, `LanguageSwitcher` (contrôle segmenté).
-
 ## Architecture
 
 ```
@@ -65,3 +57,10 @@ sur les permissions et transitions : `domain/transitions.js` ne sert qu'à n'aff
 - Pas de filtre par plage de dates ni de tri par colonne dans l'interface (le tri est supporté par `applyQuery`).
 - Photos, QR et notifications ne sont pas affichés (données non mockées).
 - Session simulée (sessionStorage) : à remplacer par access/refresh tokens.
+
+## Karya — onglet « Livreurs »
+- `KaryaPage` = onglets **Demandes** (liste/devis d'origine, inchangée) et **Livreurs** (gestion complète).
+- Livreurs : statistiques, recherche, filtre, cartes, détail (approuver/suspendre avec motif + historique) et formulaire « Nouveau livreur ».
+- Domaine pur : `domain/couriers.js` (validation, construction du compte, stats). Service : `createCourier`, `getCourierStats` dans `services/backOfficeApi.js` (même signature qu'un futur appel REST).
+- Composants réutilisables : `ui/Tabs`, `ui/Avatar`, `ui/Field`, `domain/CourierForm`, `domain/CourierCard`.
+- Design : thème moderne clair/sombre, animations (apparition en cascade, survols, modales, spinner), compatible RTL et `prefers-reduced-motion`.

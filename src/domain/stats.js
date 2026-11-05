@@ -11,18 +11,3 @@ export function computeDashboardStats({ deliveries, returns, karya, disputes }) 
     openDisputes: count(disputes, (d) => OPEN_DISPUTE_STATUSES.includes(d.status)),
   };
 }
-
-const ACTIVITY_SOURCES = [
-  ['deliveries', 'DELIVERY'], ['returns', 'RETURN'], ['karya', 'KARYA'], ['disputes', 'DISPUTE'],
-];
-
-/** Latest status events across all job collections, newest first. */
-export function recentActivity(db, limit = 8) {
-  return ACTIVITY_SOURCES
-    .flatMap(([collection, type]) => db[collection].flatMap((item) => (item.events ?? []).map((event) => ({
-      id: `${item.id}:${event.id}`, type, reference: item.reference, status: event.to_status,
-      actor_name: event.actor_name, created_at: event.created_at,
-    }))))
-    .sort((a, b) => b.created_at.localeCompare(a.created_at))
-    .slice(0, limit);
-}

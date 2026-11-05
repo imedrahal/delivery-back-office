@@ -1,12 +1,13 @@
 // Mock API with the same async signatures a real REST client would expose.
 // To go live: re-implement these functions with fetch() against /api/v1/admin/*.
-import { commit, getDb } from '../data/mockDb.js';
+import { commit, getDb, insert } from '../data/mockDb.js';
 import { applyProviderStatusChange, applyStatusChange, buildAuditLog } from '../domain/adminActions.js';
+import { buildCourierUser, courierStats, isEmailTaken, validateCourier } from '../domain/couriers.js';
 import { PAGE_SIZE } from '../domain/constants.js';
 import { ApiError } from '../domain/errors.js';
 import { applyQuery } from '../domain/listQuery.js';
 import { averageRating } from '../domain/ratings.js';
-import { computeDashboardStats, recentActivity } from '../domain/stats.js';
+import { computeDashboardStats } from '../domain/stats.js';
 import { validateTransition } from '../domain/transitions.js';
 
 export const ADMIN = { id: 'adm-001', display_name: 'Admin', email: 'admin@delivery.tn' };
@@ -54,8 +55,7 @@ export async function listResource(collection, query = {}) {
 
 export async function getDashboardStats() {
   await delay();
-  const db = getDb();
-  return { ...computeDashboardStats(db), activity: recentActivity(db) };
+  return computeDashboardStats(getDb());
 }
 
 const findOrThrow = (collection, id) => {
@@ -99,3 +99,24 @@ export async function changeProviderStatus(userId, capability, { to, reason }) {
   return { ...updated, rating: averageRating(getDb().ratings.filter((r) => r.provider_id === userId)) };
 }
 
+
+export async function getCourierStats() {
+  await delay();
+  return courierStats(getDb().users);
+}
+
+/** Admin-side creation of a courier account (immediately APPROVED). */
+export async function createCourier(input) {
+  await delay();
+  const firstError = Object.values(validateCourier(input))[0];
+  if (firstError) throw new ApiError(firstError, 422);
+  const { users } = getDb();
+  if (isEmailTaken(users, input.email)) throw new ApiError('EMAIL_TAKEN', 409);
+  const now = new Date().toISOString();
+  const courier = buildCourierUser(input, { id: `u-${String(users.length + 1).padStart(3, '0')}`, now });
+  insert('users', courier, buildAuditLog({
+    id: auditId(), actorId: ADMIN.id, action: 'courier.create', entityType: 'account', entityId: courier.id,
+    reason: null, before: null, after: { roles: courier.roles }, now,
+  }));
+  return courier;
+}

@@ -7,8 +7,6 @@ import { allowedTargets, canTransition, validateTransition } from '../transition
 import { dictionaries } from '../../i18n/index.js';
 import { translate } from '../../i18n/translate.js';
 import { createSeedDb } from '../../data/seed.js';
-import { initials } from '../format.js';
-import { recentActivity } from '../stats.js';
 
 describe('transitions', () => {
   it('forbids moving a delivered parcel back to picked up', () => {
@@ -70,22 +68,5 @@ describe('i18n', () => {
   it('interpolates params and falls back to English', () => {
     expect(translate(dictionaries, 'fr', 'common.page', { page: 2, total: 5 })).toBe('Page 2 sur 5');
     expect(translate({ en: { k: 'hello' }, fr: {} }, 'fr', 'k')).toBe('hello');
-  });
-});
-
-describe('initials', () => {
-  it('returns up to two uppercase initials', () => {
-    expect(initials('Amine Ben Salah')).toBe('AB');
-    expect(initials('  admin ')).toBe('A');
-    expect(initials(undefined)).toBe('');
-  });
-});
-
-describe('recentActivity', () => {
-  it('returns the newest events first, capped by the limit', () => {
-    const feed = recentActivity(createSeedDb(Date.UTC(2026, 9, 31)), 5);
-    expect(feed).toHaveLength(5);
-    const dates = feed.map((e) => e.created_at);
-    expect([...dates].sort().reverse()).toEqual(dates);
   });
 });
