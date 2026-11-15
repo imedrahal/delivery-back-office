@@ -30,8 +30,8 @@ l'authentification réelle et les indicateurs API, y compris sur Vercel.
 - Tableau de bord dynamique (livraisons ouvertes/en cours, retours ouverts, transporteurs actifs/inactifs et litiges ouverts)
 - Interface responsive desktop, tablette et mobile avec navigation latérale en tiroir sur mobile
 - Menus déroulants personnalisés accessibles au clavier, tactiles et compatibles RTL
-- Utilisateurs et prestataires : recherche, filtres, approbation / rejet / suspension (motif obligatoire), désactivation du compte
-- Livraisons, Retours, Karya (avec devis), Litiges (note de décision publique/interne), Évaluations (masquer / afficher)
+- Clients et livreurs chargés depuis l'API admin, avec recherche, filtres et pagination ; activation / désactivation des comptes
+- Livraisons, Retours, Karya, Litiges et évaluations des livreurs
 - Pagination, recherche et filtres, états chargement / vide / erreur / réessayer
 - Arabe (RTL), français, anglais — langue mémorisée, `dir` appliqué sur `<html>`
 - Chaque action admin : confirmation + motif obligatoire, événement ajouté à l'historique, entrée `audit_logs`
@@ -66,7 +66,23 @@ Le tableau de bord utilise les listes admin paginées `/deliveries`, `/returns` 
 `/admin/transporters`. Les compteurs de livraisons incluent `requested` (ouvertes) et `accepted`/`picked_up`
 (en cours) ; les retours ouverts incluent `requested`, `accepted` et `picked_up`. Le backend actuel gère un annuaire
 Karya sans demandes de devis : les deux cartes Karya affichent donc les transporteurs actifs et inactifs.
-Les autres fonctions de `src/services/backOfficeApi.js` utilisent encore les données simulées.
+Les sections clients et livreurs utilisent `/admin/users` (rôles `customer` et `provider`), `/admin/providers`
+pour les informations véhicule/permis, et `PATCH /admin/users/:id` avec `{ active }` pour activer ou désactiver
+un compte. Les livreurs affichés correspondent donc aux comptes `provider` du backend. Le reste des ressources
+métier utilise encore les données simulées. En mode démo Vercel, les utilisateurs et leurs actions utilisent aussi
+les données locales.
+La page Livraisons utilise `GET /deliveries` et `GET /deliveries/:id` : elle adapte les statuts et champs
+camelCase de l'API au modèle d'affichage, et charge l'historique depuis le détail à l'ouverture de la fiche.
+La fiche affiche les champs de livraison persistés et les informations associées, sans les indicateurs calculés.
+Les filtres de statut sont transmis à l'API (sans l'option « offre au coursier préféré ») ; la recherche et la
+pagination sont appliquées aux résultats récupérés. Le mode démo conserve les livraisons locales.
+Les fixtures du mode démo suivent également les champs actuellement affichés pour les livraisons
+(adresses, destinataire, colis, montants, dates et historique) et les profils coursiers
+(véhicule, zone et permis), afin que les pages récentes restent utilisables sans API.
+La page Évaluations utilise `GET /admin/users?role=provider` et les champs `ratingAvg`/`ratingCount` pour
+afficher la note moyenne de chaque livreur. Elle n'affiche pas les notes des clients ni les avis détaillés.
+La base PostgreSQL locale contient six évaluations de démonstration attachées à des livraisons terminées,
+identifiées par les références `RATING-DEMO-*` (moyennes vérifiées : 4,67 et 4,00).
 
 ## Limites connues
 

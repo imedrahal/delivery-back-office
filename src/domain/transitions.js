@@ -55,9 +55,9 @@ export const requiresDecisionNote = (entity, to) => entity === 'dispute' && DECI
 export const isFilled = (value, min = MIN_REASON_LENGTH) => typeof value === 'string' && value.trim().length >= min;
 
 /** Client-side form check: returns { reason?, note? } error codes. */
-export function validateActionForm({ reason, note, needsNote }) {
+export function validateActionForm({ reason, note, needsNote, needsReason = true }) {
   const errors = {};
-  if (!isFilled(reason)) errors.reason = 'REASON_REQUIRED';
+  if (needsReason && !isFilled(reason)) errors.reason = 'REASON_REQUIRED';
   if (needsNote && !isFilled(note)) errors.note = 'DECISION_NOTE_REQUIRED';
   return errors;
 }

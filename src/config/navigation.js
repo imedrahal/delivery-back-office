@@ -11,7 +11,7 @@ export const NAV_ITEMS = [
   },
   { path: '/deliveries', labelKey: 'nav.deliveries', icon: '📦' },
   { path: '/returns', labelKey: 'nav.returns', icon: '↩️' },
-  { path: '/karya', labelKey: 'nav.karya', icon: '🛵' },
+  { path: '/karya', labelKey: 'nav.karya', icon: '🚚' },
   { path: '/disputes', labelKey: 'nav.disputes', icon: '⚖️' },
   { path: '/ratings', labelKey: 'nav.ratings', icon: '⭐' },
 ];

@@ -4,6 +4,7 @@ import ReasonDialog from './ReasonDialog.jsx';
 import { DANGER_TARGETS } from '../../domain/constants.js';
 import { allowedTargets, requiresDecisionNote } from '../../domain/transitions.js';
 import { useI18n } from '../../context/I18nContext.jsx';
+import { USE_DEMO_BACKEND } from '../../config/runtime.js';
 
 /**
  * Generic, entity-agnostic admin action bar.
@@ -34,6 +35,7 @@ export default function StatusActionPanel({ entity, status, submit, onDone, acti
       </div>
       {target && (
         <ReasonDialog actionLabel={t(actionLabels[target] ?? `actionLabel.${target}`)} needsNote={requiresDecisionNote(entity, target)}
+          needsReason={entity !== 'account' || USE_DEMO_BACKEND}
           variant={variantFor(target)} onCancel={() => setTarget(null)} onSubmit={handleSubmit} />
       )}
     </>

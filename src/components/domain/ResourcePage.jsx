@@ -15,7 +15,7 @@ import { enumOptions } from '../../i18n/labels.js';
  *  filters:  [{ key, labelKey, values, optionPrefix }]
  *  renderDetail({ item, onUpdated }) → node ; detailTitle(item) → string
  */
-export default function ResourcePage({ titleKey, fetcher, columns, filters = [], renderDetail, detailTitle, showHeader = true }) {
+export default function ResourcePage({ titleKey, fetcher, columns, filters = [], renderDetail, detailTitle, showHeader = true, className }) {
   const { t, locale } = useI18n();
   const list = usePaginatedList(fetcher);
   const [selected, setSelected] = useState(null);
@@ -37,7 +37,7 @@ export default function ResourcePage({ titleKey, fetcher, columns, filters = [],
   const handleUpdated = (item) => { setSelected(item); list.reload(); };
 
   return (
-    <section>
+    <section className={className}>
       {showHeader && <PageHeader title={t(titleKey)} />}
       <FilterBar search={list.search} onSearch={list.setSearch} searchPlaceholder={t('common.search')}
         filters={filterDefs} values={list.filters} onFilter={list.setFilter} allLabel={t('common.all')} />

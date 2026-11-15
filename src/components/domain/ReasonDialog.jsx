@@ -6,7 +6,7 @@ import { validateActionForm } from '../../domain/transitions.js';
 import { useI18n } from '../../context/I18nContext.jsx';
 
 /** Confirmation dialog collecting the mandatory reason (and decision note when required). */
-export default function ReasonDialog({ actionLabel, needsNote, variant, onCancel, onSubmit }) {
+export default function ReasonDialog({ actionLabel, needsNote, needsReason = true, variant, onCancel, onSubmit }) {
   const { t } = useI18n();
   const [form, setForm] = useState({ reason: '', note: '', isPublic: true });
   const [errors, setErrors] = useState({});
@@ -20,13 +20,17 @@ export default function ReasonDialog({ actionLabel, needsNote, variant, onCancel
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const found = validateActionForm({ reason: form.reason, note: form.note, needsNote });
+    const found = validateActionForm({ reason: form.reason, note: form.note, needsNote, needsReason });
     setErrors(found);
     if (Object.keys(found).length > 0) return;
     setBusy(true);
     setSubmitError(null);
     try {
-      await onSubmit({ reason: form.reason.trim(), note: needsNote ? form.note : undefined, isInternalNote: !form.isPublic });
+      await onSubmit({
+        reason: needsReason ? form.reason.trim() : undefined,
+        note: needsNote ? form.note : undefined,
+        isInternalNote: !form.isPublic,
+      });
     } catch (error) {
       setSubmitError(errorCode(error));
       setBusy(false);
@@ -36,11 +40,13 @@ export default function ReasonDialog({ actionLabel, needsNote, variant, onCancel
   return (
     <Modal open title={t('dialog.title', { action: actionLabel })} closeLabel={t('common.close')} onClose={onCancel}>
       <form className="form" onSubmit={handleSubmit} noValidate>
-        <label className="field">
-          <span>{t('dialog.reason')}</span>
-          <textarea rows={3} value={form.reason} onChange={update('reason')} aria-invalid={!!errors.reason} />
-          {errors.reason && <small className="field__error">{t(`error.${errors.reason}`)}</small>}
-        </label>
+        {needsReason && (
+          <label className="field">
+            <span>{t('dialog.reason')}</span>
+            <textarea rows={3} value={form.reason} onChange={update('reason')} aria-invalid={!!errors.reason} />
+            {errors.reason && <small className="field__error">{t(`error.${errors.reason}`)}</small>}
+          </label>
+        )}
         {needsNote && (
           <>
             <label className="field">

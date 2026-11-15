@@ -1,5 +1,4 @@
-// Deterministic static mock data (shaped like the spec's PostgreSQL entities).
-// Replace the services layer with a real API client and this file can be deleted.
+// Deterministic demo fixtures matching the frontend's API-backed entity shapes.
 import {
   DISPUTE_CATEGORIES, DISPUTE_STATUSES, DELIVERY_STATUSES, KARYA_CATEGORIES, KARYA_STATUSES, LOCALES,
 } from '../domain/constants.js';
@@ -23,6 +22,7 @@ const ADDRESSES = [
 ];
 const PARCELS = ['Documents in a sealed envelope', 'Small box of electronics', 'Clothing bag', 'Fragile ceramics', 'Pharmacy order', 'Birthday gift'];
 const COMMENTS = ['Fast and polite.', 'Parcel arrived a bit late.', 'Package was damaged.', 'Great communication.', 'Okay overall.', 'Never again.'];
+const VEHICLES = ['MOTO', 'CAR', 'VAN', 'BIKE'];
 const DISPUTE_TEXTS = [
   'The parcel arrived with a broken corner.', 'The provider never showed up at the agreed time.',
   'The amount asked on site differs from the quote.', 'The courier was rude on the phone.', 'The address given by the recipient was wrong.',
@@ -44,7 +44,7 @@ function buildUsers(now) {
       karya && { capability: 'karya', status: karya },
     ].filter(Boolean);
     const created = iso(now - (60 - i) * DAY);
-    return {
+    const user = {
       id: `u-${pad(i + 1)}`, display_name: name,
       email: `${name.toLowerCase().replace(/[^a-z]+/g, '.')}@example.tn`,
       phone: `+216 ${20 + i} ${100 + i * 7} ${300 + i * 11}`,
@@ -53,6 +53,18 @@ function buildUsers(now) {
       roles: ['customer', ...(courier ? ['courier'] : []), ...(karya ? ['karya'] : [])],
       capabilities, created_at: created, updated_at: created, events: [],
     };
+    if (courier) {
+      user.courier_profile = {
+        vehicle: at(VEHICLES, i),
+        zone: at(['Tunis', 'Ariana', 'Sousse', 'Sfax'], i),
+        vehicle_plate: `${100 + i} TU ${200 + i}`,
+        vehicle_description: at(['Scooter en bon état', 'Voiture compacte', 'Véhicule utilitaire léger'], i),
+        license_number: `LIC-${pad(i + 1)}`,
+        license_uploaded: true,
+        license_photo_url: null,
+      };
+    }
+    return user;
   });
 }
 
@@ -70,7 +82,6 @@ function buildDeliveries(now, nameOf, customers, couriers) {
     const customer = at(customers, i);
     const courier = at(couriers, i);
     const assigned = ['ASSIGNED', 'PICKED_UP', 'DELIVERED', 'FAILED'].includes(status);
-    const pickedUp = ['PICKED_UP', 'DELIVERED', 'FAILED'].includes(status);
     const preferred = status === 'OPEN_FOR_PREFERRED_COURIER' || i % 5 === 0 ? courier : null;
     const created = now - (30 - i) * 5 * HOUR;
     return {
@@ -81,8 +92,11 @@ function buildDeliveries(now, nameOf, customers, couriers) {
       preferred_offer_expires_at: status === 'OPEN_FOR_PREFERRED_COURIER' ? iso(now + ((i % 9) + 1) * MIN) : null,
       pickup_address: at(ADDRESSES, i), destination_address: at(ADDRESSES, i + 3),
       recipient_name: at(NAMES, i + 5), recipient_phone: `+216 9${i % 10} 55${pad(i)}`.slice(0, 16),
-      parcel_description: at(PARCELS, i), notes: i % 4 === 0 ? 'Call before arriving.' : '',
-      pickup_confirmed_at: pickedUp ? iso(created + 40 * MIN) : null,
+      parcel_description: at(PARCELS, i),
+      cod_amount: i % 3 === 0 ? 0 : 20 + i * 5,
+      courier_fee: 5 + (i % 4) * 2,
+      delivered_at: status === 'DELIVERED' ? iso(created + 90 * MIN) : null,
+      settled_at: status === 'DELIVERED' && i % 2 === 0 ? iso(created + 2 * HOUR) : null,
       failure_reason: status === 'FAILED' ? at(['RECIPIENT_UNAVAILABLE', 'ADDRESS_ISSUE', 'PARCEL_ISSUE'], i) : null,
       events: buildEvents(deliveryPath(status), created, 'System'),
       created_at: iso(created), updated_at: iso(created + HOUR),

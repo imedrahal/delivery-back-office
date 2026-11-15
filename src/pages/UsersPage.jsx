@@ -61,7 +61,16 @@ function UserDetail({ item, type, onUpdated }) {
     items.push(
       { label: t('field.vehicle'), value: profile?.vehicle ? t(`vehicle.${profile.vehicle}`) : t('common.none') },
       { label: t('field.zone'), value: profile?.zone || t('common.none') },
-      { label: t('field.courierStatus'), value: <StatusBadge status={capability?.status} /> },
+      {label: t('field.vehiclePlate'), value: profile?.vehicle_plate || t('common.none')},
+      {label: t('field.licenseNumber'), value: profile?.license_number || t('common.none')},
+      {label: t('field.vehicleDescription'), value: profile?.vehicle_description || t('common.none')},
+      {
+        label: t('field.licensePhoto'),
+        value: profile?.license_photo_url
+          ? <a href={profile.license_photo_url} target="_blank" rel="noreferrer">{t('common.view')}</a>
+          : t('common.none'),
+      },
+      {label: t('field.courierStatus'), value: <StatusBadge status={capability?.status} />},
     );
   } else {
     items.push({ label: t('field.language'), value: item.preferred_language?.toUpperCase() || t('common.none') });
