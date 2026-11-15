@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Button from '../ui/Button.jsx';
 import Field from '../ui/Field.jsx';
+import Select from '../ui/Select.jsx';
 import { useI18n } from '../../context/I18nContext.jsx';
 import { EMPTY_COURIER, hasErrors, validateCourier, VEHICLES } from '../../domain/couriers.js';
 import { errorCode } from '../../domain/errors.js';
@@ -46,9 +47,12 @@ export default function CourierForm({ onSubmit, onCancel }) {
       </div>
       <div className="form__row">
         <Field label={t('field.vehicle')}>
-          <select value={values.vehicle} onChange={set('vehicle')}>
-            {enumOptions(t, 'vehicle', VEHICLES).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
+          <Select
+            label={t('field.vehicle')}
+            value={values.vehicle}
+            options={enumOptions(t, 'vehicle', VEHICLES)}
+            onChange={(value) => setValues((current) => ({ ...current, vehicle: value }))}
+          />
         </Field>
         <Field label={t('field.zone')} error={msg('zone')}>
           <input value={values.zone} onChange={set('zone')} />

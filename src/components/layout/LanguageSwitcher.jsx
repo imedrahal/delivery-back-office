@@ -1,11 +1,16 @@
 import { LOCALES, LOCALE_LABELS } from '../../domain/constants.js';
 import { useI18n } from '../../context/I18nContext.jsx';
+import Select from '../ui/Select.jsx';
 
 export default function LanguageSwitcher() {
   const { locale, setLocale, t } = useI18n();
   return (
-    <select className="lang-select" value={locale} aria-label={t('common.language')} onChange={(e) => setLocale(e.target.value)}>
-      {LOCALES.map((code) => <option key={code} value={code}>{LOCALE_LABELS[code]}</option>)}
-    </select>
+    <Select
+      className="lang-select"
+      value={locale}
+      label={t('common.language')}
+      options={LOCALES.map((code) => ({ value: code, label: LOCALE_LABELS[code] }))}
+      onChange={setLocale}
+    />
   );
 }

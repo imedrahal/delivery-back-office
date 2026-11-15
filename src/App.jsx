@@ -22,7 +22,9 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route index element={<DashboardPage />} />
-                <Route path="users" element={<UsersPage />} />
+                <Route path="users" element={<Navigate to="/users/clients" replace />} />
+                <Route path="users/clients" element={<UsersPage type="clients" />} />
+                <Route path="users/couriers" element={<UsersPage type="couriers" />} />
                 <Route path="deliveries" element={<DeliveriesPage />} />
                 <Route path="returns" element={<ReturnsPage />} />
                 <Route path="karya" element={<KaryaPage />} />

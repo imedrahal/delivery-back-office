@@ -9,7 +9,7 @@ import { useI18n } from '../../context/I18nContext.jsx';
  * Generic, entity-agnostic admin action bar.
  * `submit(to, form)` is injected by the page (it knows which service to call).
  */
-export default function StatusActionPanel({ entity, status, submit, onDone }) {
+export default function StatusActionPanel({ entity, status, submit, onDone, actionLabels = {} }) {
   const { t } = useI18n();
   const [target, setTarget] = useState(null);
   const targets = allowedTargets(entity, status);
@@ -28,12 +28,12 @@ export default function StatusActionPanel({ entity, status, submit, onDone }) {
       <div className="row">
         {targets.map((to) => (
           <Button key={to} variant={DANGER_TARGETS.includes(to) ? 'danger-outline' : 'primary-outline'} onClick={() => setTarget(to)}>
-            {t(`actionLabel.${to}`)}
+            {t(actionLabels[to] ?? `actionLabel.${to}`)}
           </Button>
         ))}
       </div>
       {target && (
-        <ReasonDialog actionLabel={t(`actionLabel.${target}`)} needsNote={requiresDecisionNote(entity, target)}
+        <ReasonDialog actionLabel={t(actionLabels[target] ?? `actionLabel.${target}`)} needsNote={requiresDecisionNote(entity, target)}
           variant={variantFor(target)} onCancel={() => setTarget(null)} onSubmit={handleSubmit} />
       )}
     </>
