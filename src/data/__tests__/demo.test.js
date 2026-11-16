@@ -18,7 +18,7 @@ describe('demo data', () => {
       openDeliveries: 10,
       activeDeliveries: 8,
       openReturns: 8,
-      activeTransporters: 2,
+      activeTransporters: 4,
       inactiveTransporters: 2,
       openDisputes: 4,
     });

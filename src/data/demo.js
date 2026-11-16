@@ -1,4 +1,3 @@
-import { courierStats } from '../domain/couriers.js';
 import { ApiError } from '../domain/errors.js';
 import { computeDashboardStats } from '../domain/stats.js';
 
@@ -30,13 +29,13 @@ export function authenticateDemo(identifier, password) {
 
 export function getDemoDashboardStats(db) {
   const stats = computeDashboardStats(db);
-  const couriers = courierStats(db.users);
+  const activeTransporters = db.transporters.filter((transporter) => transporter.active).length;
   return {
     openDeliveries: stats.openDeliveries,
     activeDeliveries: stats.activeDeliveries,
     openReturns: stats.openReturns,
-    activeTransporters: couriers.approved,
-    inactiveTransporters: couriers.total - couriers.approved,
+    activeTransporters,
+    inactiveTransporters: db.transporters.length - activeTransporters,
     openDisputes: stats.openDisputes,
   };
 }

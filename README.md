@@ -17,10 +17,10 @@ En local, le front appelle `http://localhost:3000/api/v1/auth/login`. Configurez
 si l'API est hébergée ailleurs (par exemple `https://api.example.com/api/v1`). Le compte administrateur
 doit être créé/configuré côté backend.
 
-Sur Vercel, si `VITE_API_BASE_URL` pointe vers `localhost`, `127.0.0.1` ou `::1`, le login et le tableau
-de bord passent automatiquement en mode démo : `demo@livra.local` / `Demo123!`. Les indicateurs utilisent
-les données d'exemple locales et sont signalés comme fictifs. L'application exécutée en local continue
-d'appeler l'API locale. Si le déploiement Vercel utilise un domaine personnalisé non détecté automatiquement,
+Sur Vercel, si `VITE_API_BASE_URL` pointe vers `localhost`, `127.0.0.1` ou `::1`, l'application passe
+automatiquement en mode démo : `demo@livra.local` / `Demo123!`. Les pages qui utilisent une API, notamment
+Karya, emploient alors leurs données d'exemple locales. L'application exécutée en local continue d'appeler
+l'API locale. Si le déploiement Vercel utilise un domaine personnalisé non détecté automatiquement,
 ajoutez `VITE_DEPLOYMENT_PLATFORM=vercel` à ses variables d'environnement. Une URL d'API distante conserve
 l'authentification réelle et les indicateurs API, y compris sur Vercel.
 
@@ -34,7 +34,7 @@ l'authentification réelle et les indicateurs API, y compris sur Vercel.
 - Livraisons, Retours, Karya, Litiges et évaluations des livreurs
 - Pagination, recherche et filtres, états chargement / vide / erreur / réessayer
 - Arabe (RTL), français, anglais — langue mémorisée, `dir` appliqué sur `<html>`
-- Chaque action admin : confirmation + motif obligatoire, événement ajouté à l'historique, entrée `audit_logs`
+- Les changements d'état métier demandent confirmation et motif ; les opérations concernées ajoutent un événement et une entrée `audit_logs`
 
 ## Architecture
 
@@ -64,13 +64,18 @@ un e-mail ou un numéro de téléphone. Les tokens et l'utilisateur renvoyés pa
 en session. Seuls les comptes dont le rôle est `admin` peuvent accéder au back-office.
 Le tableau de bord utilise les listes admin paginées `/deliveries`, `/returns` et `/disputes`, ainsi que
 `/admin/transporters`. Les compteurs de livraisons incluent `requested` (ouvertes) et `accepted`/`picked_up`
-(en cours) ; les retours ouverts incluent `requested`, `accepted` et `picked_up`. Le backend actuel gère un annuaire
-Karya sans demandes de devis : les deux cartes Karya affichent donc les transporteurs actifs et inactifs.
+(en cours) ; les retours ouverts incluent `requested`, `accepted` et `picked_up`. La page Karya utilise l'annuaire admin `/admin/transporters` : elle affiche les transporteurs avec recherche
+et filtre par visibilité, et permet uniquement de masquer ou réactiver leur compte via
+`PATCH /admin/transporters/:id` avec `{ active }`. La création utilise `POST /admin/transporters` et les
+champs définis par le backend (nom, téléphone, type de véhicule requis ; ville, description du véhicule,
+capacité, description et état actif optionnels). En mode démo, les mêmes opérations utilisent les
+transporteurs et données locales. Le tableau de bord démo calcule aussi ses compteurs de transporteurs
+depuis cette liste.
 Les sections clients et livreurs utilisent `/admin/users` (rôles `customer` et `provider`), `/admin/providers`
 pour les informations véhicule/permis, et `PATCH /admin/users/:id` avec `{ active }` pour activer ou désactiver
 un compte. Les livreurs affichés correspondent donc aux comptes `provider` du backend. Le reste des ressources
-métier utilise encore les données simulées. En mode démo Vercel, les utilisateurs et leurs actions utilisent aussi
-les données locales.
+métier non intégrées à une route backend utilise encore les données simulées. En mode démo Vercel, les utilisateurs
+et leurs actions utilisent aussi les données locales.
 La page Livraisons utilise `GET /deliveries` et `GET /deliveries/:id` : elle adapte les statuts et champs
 camelCase de l'API au modèle d'affichage, et charge l'historique depuis le détail à l'ouverture de la fiche.
 La fiche affiche les champs de livraison persistés et les informations associées, sans les indicateurs calculés.

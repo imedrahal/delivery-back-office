@@ -24,6 +24,7 @@ const SEARCH_FIELDS = {
   karya: ['id', 'reference', 'customer_name', 'provider_name', 'description'],
   disputes: ['id', 'reference', 'job_ref', 'opened_by_name', 'description'],
   ratings: ['provider_name'],
+  transporters: ['name', 'phone', 'city', 'vehicleType', 'vehicleDescription', 'capacity', 'description'],
 };
 
 const ENTITY_CONFIG = {
@@ -263,6 +264,31 @@ async function listApiCourierRatings(query = {}) {
   });
 }
 
+async function listTransporters(query = {}) {
+  let items;
+  if (USE_DEMO_BACKEND) {
+    await delay();
+    items = getDb().transporters;
+  } else {
+    const result = await requestApi('/admin/transporters', { token: getAdminToken() });
+    if (!Array.isArray(result?.items) || !result.items.every((item) =>
+      item?.id && item.name && typeof item.active === 'boolean')) {
+      throw new ApiError('INVALID_RESPONSE');
+    }
+    items = result.items;
+  }
+
+  const mappedItems = items.map((transporter) => ({
+    ...transporter,
+    account_status: transporter.active ? 'ACTIVE' : 'DEACTIVATED',
+  }));
+  return applyQuery(mappedItems, {
+    pageSize: PAGE_SIZE,
+    ...query,
+    searchFields: SEARCH_FIELDS.transporters,
+  });
+}
+
 export async function login(identifier, password) {
   if (USE_DEMO_BACKEND) return authenticateDemo(identifier, password);
 
@@ -284,6 +310,7 @@ export async function listResource(collection, query = {}) {
   if (collection === 'deliveries' && !USE_DEMO_BACKEND) return listApiDeliveries(query);
   if (collection === 'ratings' && !USE_DEMO_BACKEND) return listApiCourierRatings(query);
   if (collection === 'users' && !USE_DEMO_BACKEND) return listApiUsers(query);
+  if (collection === 'transporters') return listTransporters(query);
 
   await delay();
   const db = getDb();
@@ -307,6 +334,81 @@ export async function listResource(collection, query = {}) {
     });
   }
   return applyQuery(items, { pageSize: PAGE_SIZE, ...query, searchFields: SEARCH_FIELDS[collection] });
+}
+
+export async function setTransporterActive(id, active) {
+  if (typeof active !== 'boolean') throw new ApiError('VALIDATION', 422);
+  if (!USE_DEMO_BACKEND) {
+    const result = await requestApi(`/admin/transporters/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: { active },
+      token: getAdminToken(),
+    });
+    if (result?.id !== id || result.active !== active) throw new ApiError('INVALID_RESPONSE');
+    return result;
+  }
+
+  await delay();
+  const transporter = findOrThrow('transporters', id);
+  const updated = { ...transporter, active };
+  const now = new Date().toISOString();
+  commit('transporters', updated, buildAuditLog({
+    id: auditId(),
+    actorId: MOCK_ADMIN_ACTOR.id,
+    action: `transporter.${active ? 'activate' : 'deactivate'}`,
+    entityType: 'transporter',
+    entityId: id,
+    reason: null,
+    before: { active: transporter.active },
+    after: { active },
+    now,
+  }));
+  return updated;
+}
+
+export async function createTransporter(input) {
+  if (!input?.name?.trim() || !input?.phone?.trim() || !input?.vehicleType?.trim()) {
+    throw new ApiError('VALIDATION', 422);
+  }
+  const body = {
+    name: input.name.trim(),
+    phone: input.phone.trim(),
+    city: input.city?.trim() || null,
+    vehicleType: input.vehicleType.trim(),
+    vehicleDescription: input.vehicleDescription?.trim() || null,
+    capacity: input.capacity?.trim() || null,
+    description: input.description?.trim() || null,
+    active: input.active ?? true,
+  };
+  if (!USE_DEMO_BACKEND) {
+    const result = await requestApi('/admin/transporters', { body, token: getAdminToken() });
+    if (!result?.id || !result.name || typeof result.active !== 'boolean') {
+      throw new ApiError('INVALID_RESPONSE');
+    }
+    return { ...result, account_status: result.active ? 'ACTIVE' : 'DEACTIVATED' };
+  }
+
+  await delay();
+  const { transporters } = getDb();
+  const transporter = {
+    id: `trn-${String(transporters.length + 1).padStart(3, '0')}`,
+    ...body,
+    photoUrl: null,
+    createdAt: new Date().toISOString(),
+    account_status: body.active ? 'ACTIVE' : 'DEACTIVATED',
+  };
+  insert('transporters', transporter, buildAuditLog({
+    id: auditId(),
+    actorId: MOCK_ADMIN_ACTOR.id,
+    action: 'transporter.create',
+    entityType: 'transporter',
+    entityId: transporter.id,
+    reason: null,
+    before: null,
+    after: { name: transporter.name, active: transporter.active },
+    now: transporter.createdAt,
+  }));
+  return transporter;
 }
 
 export async function getDashboardStats() {

@@ -68,6 +68,34 @@ function buildUsers(now) {
   });
 }
 
+function buildTransporters(now) {
+  const vehicles = [
+    { type: 'Camion', description: 'Camion avec hayon élévateur', capacity: 'Jusqu’à 3 tonnes' },
+    { type: 'Fourgon', description: 'Fourgon fermé pour déménagement', capacity: 'Jusqu’à 20 m³' },
+    { type: 'Camionnette', description: 'Camionnette polyvalente', capacity: 'Jusqu’à 1,5 tonne' },
+    { type: 'Porteur', description: 'Camion de transport longue distance', capacity: 'Jusqu’à 5 tonnes' },
+    { type: 'Fourgon', description: 'Fourgon adapté aux petits volumes', capacity: 'Jusqu’à 12 m³' },
+    { type: 'Camion', description: 'Camion plateau', capacity: 'Jusqu’à 7 tonnes' },
+  ];
+  return vehicles.map((vehicle, i) => ({
+    id: `trn-${pad(i + 1)}`,
+    name: ['Transport Ben Salah', 'Rapide Déménagement', 'Services Trabelsi', 'Transport Sahel', 'Express Tunis', 'Logistique Gharbi'][i],
+    phone: `+216 ${20 + i} 400 ${100 + i}`,
+    city: at(['Tunis', 'Ariana', 'Sousse', 'Sfax', 'Ben Arous', 'Nabeul'], i),
+    vehicleType: vehicle.type,
+    vehicleDescription: vehicle.description,
+    capacity: vehicle.capacity,
+    description: at([
+      'Transport et déménagement pour particuliers et professionnels.',
+      'Équipe disponible pour vos déménagements et transports de meubles.',
+      'Service de transport fiable dans la région et ses environs.',
+    ], i),
+    photoUrl: null,
+    active: i !== 2 && i !== 5,
+    createdAt: iso(now - (45 - i * 4) * DAY),
+  }));
+}
+
 const DELIVERY_FLOW = ['OPEN_FOR_COURIERS', 'ASSIGNED', 'PICKED_UP', 'DELIVERED'];
 function deliveryPath(status) {
   if (status === 'OPEN_FOR_PREFERRED_COURIER') return [status];
@@ -223,5 +251,6 @@ export function createSeedDb(now = Date.now()) {
   const karya = buildKarya(now, nameOf, customers, karyaProviders);
   const ratings = buildRatings(now, deliveries, karya);
   const disputes = buildDisputes(now, deliveries, returns, karya);
-  return { users, deliveries, returns, karya, ratings, disputes, audit_logs: [] };
+  const transporters = buildTransporters(now);
+  return { users, deliveries, returns, karya, ratings, disputes, transporters, audit_logs: [] };
 }

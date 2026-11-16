@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { changeStatus, getDashboardStats, getDeliveryDetails, listResource, login } from '../backOfficeApi.js';
+import { changeStatus, createTransporter, getDashboardStats, getDeliveryDetails, listResource, login, setTransporterActive } from '../backOfficeApi.js';
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -343,6 +343,114 @@ describe('delivery API', () => {
     expect(fetch).toHaveBeenCalledWith(
       'http://localhost:3000/api/v1/deliveries/delivery-1',
       expect.objectContaining({ headers: expect.objectContaining({ Authorization: expect.any(String) }) }),
+    );
+  });
+});
+
+describe('Karya transporter API', () => {
+  const setAdminSession = () => {
+    vi.stubGlobal('sessionStorage', {
+      getItem: () => JSON.stringify({
+        accessToken: 'admin-token',
+        user: { role: 'admin' },
+      }),
+    });
+  };
+
+  it('lists transporter profiles and maps visibility to account status', async () => {
+    setAdminSession();
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        items: [
+          { id: 'transporter-1', name: 'Transport Example', phone: '+21620123456', city: 'Tunis', vehicleType: 'Truck', active: true },
+          { id: 'transporter-2', name: 'Transport Hidden', phone: '+21620987654', city: 'Sfax', vehicleType: 'Van', active: false },
+        ],
+      }),
+    });
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(listResource('transporters', { pageSize: 9 })).resolves.toMatchObject({
+      total: 2,
+      items: [
+        { id: 'transporter-1', active: true, account_status: 'ACTIVE' },
+        { id: 'transporter-2', active: false, account_status: 'DEACTIVATED' },
+      ],
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:3000/api/v1/admin/transporters',
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: expect.any(String) }) }),
+    );
+  });
+
+  it('only toggles transporter account visibility through the admin endpoint', async () => {
+    setAdminSession();
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ id: 'transporter-1', active: false }),
+    });
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(setTransporterActive('transporter-1', false)).resolves.toMatchObject({
+      id: 'transporter-1',
+      active: false,
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:3000/api/v1/admin/transporters/transporter-1',
+      expect.objectContaining({
+        method: 'PATCH',
+        body: JSON.stringify({ active: false }),
+      }),
+    );
+  });
+
+  it('creates a transporter with the backend fields and activates the new account', async () => {
+    setAdminSession();
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: async () => ({
+        id: 'transporter-new',
+        name: 'Transport Nouveau',
+        phone: '+21620123456',
+        city: 'Tunis',
+        vehicleType: 'Camion',
+        vehicleDescription: null,
+        capacity: '3 tonnes',
+        description: null,
+        active: true,
+      }),
+    });
+    vi.stubGlobal('fetch', fetch);
+
+    await expect(createTransporter({
+      name: ' Transport Nouveau ',
+      phone: ' +216 20 123 456 ',
+      city: ' Tunis ',
+      vehicleType: ' Camion ',
+      capacity: ' 3 tonnes ',
+    })).resolves.toMatchObject({
+      id: 'transporter-new',
+      active: true,
+      account_status: 'ACTIVE',
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      'http://localhost:3000/api/v1/admin/transporters',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          name: 'Transport Nouveau',
+          phone: '+216 20 123 456',
+          city: 'Tunis',
+          vehicleType: 'Camion',
+          vehicleDescription: null,
+          capacity: '3 tonnes',
+          description: null,
+          active: true,
+        }),
+      }),
     );
   });
 });
