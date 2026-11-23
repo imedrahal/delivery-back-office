@@ -60,7 +60,7 @@ export default function Select({ value, options, onChange, label, className = ''
   };
 
   return (
-    <div ref={rootRef} className={`select ${className}`.trim()}>
+    <div ref={rootRef} className={`select ${open ? 'is-open' : ''} ${className}`.trim()}>
       <button
         type="button"
         className={`select__trigger ${open ? 'is-open' : ''}`}
